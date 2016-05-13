@@ -393,7 +393,7 @@ module.exports = function (platform) {
         }
         var targetRepo = repos[targetEntry.root];
         var repo = repos[entry.root];
-        targetRepo.hasHash("tree", entry.hash, function (err, has) {
+        targetRepo.hasHash(entry.hash, function (err, has) {
           if (err) return callback(err);
           // If the destination already has the tree hash, we're done.
           if (has) return callback(null, entry);
