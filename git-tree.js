@@ -393,7 +393,7 @@ module.exports = function (platform) {
         }
         var targetRepo = repos[targetEntry.root];
         var repo = repos[entry.root];
-        targetRepo.hasHash("tree", entry.hash, function (err, has) {
+        targetRepo.hasHash(entry.hash, function (err, has) {
           if (err) return callback(err);
           // If the destination already has the tree hash, we're done.
           if (has) return callback(null, entry);
@@ -529,7 +529,7 @@ module.exports = function (platform) {
     var repo = repos[path];
     if (repo) return repo;
     var config = configs[path];
-    if (!config) throw new Error("No repo at " + JSON.srtingify(path));
+    if (!config) throw new Error("No repo at " + JSON.stringify(path));
     repo = repos[path] = platform.createRepo(config);
     return repo;
   }
@@ -559,7 +559,11 @@ module.exports = function (platform) {
       if (hash) config.head = hash;
       if (!config.head && repo.fetch) {
         config.depth = config.depth || 1;
-        return repo.fetch(config.ref, config.depth, onHead);
+        return repo.fetch(config.ref, config.depth, function(err, hash) {
+          // Create the local tracking ref.
+          repo.updateRef(config.ref, hash, noop);
+          onHead(err, hash);
+        });
       }
       if (!current) {
         if (config.head) {
